@@ -13,30 +13,30 @@
 # limitations under the License.
 
 import joblib
-import fairing
 import numpy as np
+from kubeflow import fairing
 
 MODEL_FILE = 'trained_ames_model.dat'
 
 fairing.config.set_builder('docker',
-  registry='gcr.io/mrick-gcp',
-  base_image="seldonio/seldon-core-s2i-python3:0.4")
+                           registry='gcr.io/mrick-gcp',
+                           base_image="seldonio/seldon-core-s2i-python3:0.4")
 
 fairing.config.set_deployer('serving', serving_class="HousingServe")
 
+
 class HousingServe(object):
-  def __init__(self, model_file=MODEL_FILE):
-    """Load the housing model using joblib."""
-    self.model = joblib.load(model_file)
+    def __init__(self, model_file=MODEL_FILE):
+        """Load the housing model using joblib."""
+        self.model = joblib.load(model_file)
 
-
-  def predict(self, X, feature_names):
-    """Predict using the model for given ndarray."""
-    prediction = self.model.predict(data=X)
-    return [[prediction.item(0), prediction.item(0)]]
+    def predict(self, X):
+        """Predict using the model for given ndarray."""
+        prediction = self.model.predict(data=X)
+        return [prediction]
 
 
 if __name__ == '__main__':
-  fairing.config.run()
-  serve = HousingServe()
-  print(serve.predict(np.ndarray([1, 37]), None))
+    fairing.config.run()
+    serve = HousingServe()
+    print(serve.predict(np.ndarray([1, 37])))
